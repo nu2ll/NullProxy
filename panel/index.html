@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Null Proxy</title>
+<style>
+:root{--bg:#000;--bg2:#070707;--card:#0c0c0c;--card2:#151515;--line:#242424;--line2:#3a3a3a;--txt:#fafafa;--mut:#8c8c8c;--pri:#fff;--pri-t:#000;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24;--inp:#050505;--grid:#ffffff0d;--glow:#ffffff12}
+:root.light{--bg:#f6f6f6;--bg2:#fff;--card:#fff;--card2:#f2f2f2;--line:#e4e4e4;--line2:#c9c9c9;--txt:#0a0a0a;--mut:#737373;--pri:#0a0a0a;--pri-t:#fff;--ok:#16a34a;--bad:#dc2626;--warn:#d97706;--inp:#fff;--grid:#0000000d;--glow:#00000008}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.7 Vazirmatn,"Segoe UI",Tahoma,system-ui,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 380px at 80% -10%,var(--glow),transparent),radial-gradient(var(--grid) 1px,transparent 1px) 0 0/22px 22px,var(--bg)}
+a{color:var(--txt)}svg.ic{flex-shrink:0;vertical-align:-3px}
+.layout{display:flex;min-height:100vh}
+aside{width:224px;flex-shrink:0;padding:20px 14px;border-left:1px solid var(--line);background:var(--bg2);position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;margin:0 6px 24px}
+.logo{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--pri);color:var(--pri-t)}
+.nav button,.bnav button{display:flex;width:100%;align-items:center;gap:11px;border:0;background:none;color:var(--mut);padding:10px 12px;border-radius:10px;font:inherit;cursor:pointer;margin-bottom:3px;text-align:right;transition:.15s}
+.nav button:hover{color:var(--txt);background:var(--card2)}
+.nav button.act{background:var(--card2);color:var(--txt);font-weight:700;box-shadow:inset -2px 0 0 var(--pri)}
+main{flex:1;min-width:0;padding:22px 24px 90px;max-width:1280px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}.top h1{font-size:21px;margin:0;flex:1;font-weight:800}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;transition:border-color .2s}
+.card:hover{border-color:var(--line2)}
+.grid{display:grid;gap:14px}.kp{grid-template-columns:repeat(auto-fit,minmax(185px,1fr))}.g2{grid-template-columns:2fr 1fr}.g3{grid-template-columns:repeat(auto-fit,minmax(310px,1fr))}.mb{margin-bottom:14px}
+.kpi{position:relative;overflow:hidden;min-height:116px}.kpi .k{color:var(--mut);font-size:12px;display:flex;align-items:center;gap:8px}
+.kpi .v{font-size:24px;font-weight:800;margin-top:6px;letter-spacing:-.5px}.kpi .s{font-size:11px;color:var(--mut)}.kpi svg.sp{position:absolute;left:0;bottom:0;width:100%;height:40px}
+.ib{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--card2);border:1px solid var(--line);color:var(--txt)}
+h2{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px;font-weight:700}
+.btn{border:1px solid var(--line);background:var(--card2);color:var(--txt);padding:8px 14px;border-radius:10px;cursor:pointer;font:inherit;font-size:13px;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:.15s;text-decoration:none}
+.btn:hover{border-color:var(--txt)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.p{background:var(--pri);color:var(--pri-t);border-color:var(--pri);font-weight:700}.btn.p:hover{opacity:.85}
+.btn.d{color:var(--bad)}.btn.d:hover{border-color:var(--bad)}.btn.s{padding:4px 10px;font-size:12px;border-radius:8px}
+input,select{background:var(--inp);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit;width:100%;outline:none;transition:.15s}
+input:focus,select:focus{border-color:var(--txt);box-shadow:0 0 0 3px var(--glow)}select{padding:4px 8px;font-size:12px;width:auto;max-width:150px;border-radius:8px}
+label{display:block;color:var(--mut);font-size:12px;margin:10px 0 5px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.row>.f{flex:1;min-width:140px}.sb{justify-content:space-between}.nw{flex-wrap:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:99px;font-size:12px;border:1px solid var(--line);background:var(--card2);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut);display:inline-block;flex-shrink:0}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 3px #4ade8026}.dot.bad{background:var(--bad);box-shadow:0 0 0 3px #f8717126}.dot.warn{background:var(--warn)}
+.pill.ok{color:var(--ok);border-color:#4ade8044}.pill.bad{color:var(--bad);border-color:#f8717144}.pill.warn{color:var(--warn);border-color:#fbbf2444}.pill.inv{background:var(--pri);color:var(--pri-t);border-color:var(--pri)}
+.mono{font-family:ui-monospace,Consolas,monospace;direction:ltr;unicode-bidi:embed;font-size:12px;word-break:break-all}
+.mut{color:var(--mut)}.small{font-size:12px}.hide{display:none!important}
+.alert{border-radius:12px;padding:11px 14px;margin-bottom:12px;border:1px solid var(--line2);background:var(--card2);font-size:13px}
+.bar{height:6px;border-radius:99px;background:var(--card2);overflow:hidden;border:1px solid var(--line)}.bar>i{display:block;height:100%;background:var(--pri);border-radius:99px;transition:width .4s}.bar.hot>i{background:var(--bad)}
+.ep{display:flex;flex-direction:column;gap:9px}.ep.prim{border-color:var(--txt)}.ep .host{font-weight:800;font-size:13px}
+.stl{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:10px;background:var(--card2);font-size:12px;flex-wrap:wrap}.stl>span:first-child{display:flex;align-items:center;gap:6px;color:var(--mut)}
+.hist{display:flex;gap:2px;align-items:flex-end;height:18px;direction:ltr}.hist i{width:4px;border-radius:2px;background:var(--txt);opacity:.75}.hist i.x{background:var(--bad);height:100%!important;opacity:1}
+.verdict{font-weight:700;font-size:13px;padding:8px 10px;border-radius:10px;text-align:center;border:1px solid var(--line)}
+.verdict.ok{color:var(--ok);border-color:#4ade8044;background:#4ade8010}.verdict.bad{color:var(--bad);border-color:#f8717144;background:#f8717110}.verdict.warn{color:var(--warn);border-color:#fbbf2444;background:#fbbf2410}
+.user{display:grid;grid-template-columns:1.4fr 1fr 1.3fr auto;gap:12px;align-items:center;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card2);margin-bottom:10px}.user.off{opacity:.55}
+.avatar{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-weight:800;flex-shrink:0;text-transform:uppercase;border:1px solid var(--line2)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+#chart{width:100%;height:230px;display:block}.cw{position:relative}
+.tip{position:absolute;top:0;pointer-events:none;background:var(--txt);color:var(--bg);font-size:12px;padding:4px 9px;border-radius:8px;white-space:nowrap;transform:translate(50%,-120%);opacity:0;transition:opacity .1s}
+.seg{display:inline-flex;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:3px}.seg button{border:0;background:none;color:var(--mut);font:inherit;font-size:12px;padding:3px 10px;border-radius:7px;cursor:pointer}.seg button.act{background:var(--pri);color:var(--pri-t);font-weight:700}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:12px;min-width:0}.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-left:6px;border:1px solid var(--line2)}
+.gauges{display:flex;gap:10px;justify-content:space-around}
+.log{max-height:380px;overflow:auto;background:var(--inp);border-radius:10px;padding:10px;border:1px solid var(--line)}
+.ev{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px;align-items:center}.ev:last-child{border:0}
+.login{max-width:380px;margin:12vh auto;padding:0 16px}
+#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--pri);color:var(--pri-t);padding:9px 18px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;z-index:99;font-weight:700}#toast.show{opacity:1;transform:translateX(-50%)}
+dialog{background:var(--card);color:var(--txt);border:1px solid var(--line2);border-radius:16px;width:min(540px,94vw);padding:18px;max-height:90vh;overflow:auto}dialog::backdrop{background:#000a;backdrop-filter:blur(4px)}
+.qr{background:#fff;border-radius:12px;padding:6px;display:inline-block;line-height:0}.qr svg{width:180px;height:180px}
+.linkrow{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card2)}
+.empty{padding:28px;text-align:center;color:var(--mut)}
+.rr{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card2);margin-bottom:8px}.rr>.rm{flex:1;min-width:170px}
+.sum{display:flex;gap:8px;flex-wrap:wrap}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.bnav{display:none}
+@media(max-width:900px){aside{display:none}.g2{grid-template-columns:1fr}main{padding:14px 12px 96px}
+ .bnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--line);z-index:50;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+ .bnav button{flex:1;font-size:10px;flex-direction:column;gap:2px;padding:4px 0;margin:0;width:auto;align-items:center}.bnav button.act{color:var(--txt);font-weight:700}
+ .user{grid-template-columns:1fr 1fr}.user .acts{grid-column:1/-1;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="loginView" class="login hide"><div class="card" style="text-align:center;padding:30px 22px">
+  <div class="logo" style="margin:0 auto 14px;width:56px;height:56px;border-radius:16px" data-i="nul" data-s="28"></div>
+  <div style="font-size:21px;font-weight:800">Null Proxy</div><div class="mut small" style="margin-bottom:16px">مدیریت پروکسی تلگرام</div>
+  <input id="pw" type="password" placeholder="رمز ادمین" autocomplete="current-password" style="text-align:center">
+  <button class="btn p" style="width:100%;justify-content:center;margin-top:12px;padding:11px" onclick="login()">ورود</button>
+  <div class="mut small" style="margin-top:12px">رمز اولیه توی Deploy Logs ریلوی چاپ میشه</div></div></div>
+
+<div id="app" class="layout hide">
+  <aside><div class="brand"><div class="logo" data-i="nul" data-s="20"></div>Null Proxy</div><div class="nav" id="nav"></div><div class="small mut" id="sideInfo" style="margin-top:auto;padding:0 6px"></div></aside>
+  <main>
+    <div class="top"><h1 id="pageTitle"></h1>
+      <span id="status" class="pill"><span class="dot"></span><span id="statusTxt">...</span></span>
+      <button class="btn s" onclick="toggleTheme()" id="themeBtn" title="حالت روز/شب"></button>
+      <button class="btn s" onclick="logout()" data-i="logout" title="خروج"></button></div>
+
+    <section data-tab="dash">
+      <div class="grid kp mb" id="kpis"></div>
+      <div class="grid g2 mb">
+        <div class="card"><div class="row sb" style="margin-bottom:8px"><h2 style="margin:0"><span data-i="activity"></span>اتصال و سرعت</h2>
+          <div class="row"><div class="seg" id="segMode"><button data-v="1" class="act">اتصال</button><button data-v="2">سرعت</button></div>
+          <div class="seg" id="segRange"><button data-v="3600">۱ ساعت</button><button data-v="21600">۶ ساعت</button><button data-v="86400" class="act">۲۴ ساعت</button></div></div></div>
+          <div class="cw"><svg id="chart" viewBox="0 0 1000 230" preserveAspectRatio="none"></svg><div class="tip" id="tip"></div></div>
+          <div class="row sb small mut"><span id="cFrom"></span><span id="cMax"></span></div></div>
+        <div class="card"><h2><span data-i="pie"></span>مصرف کاربرها</h2><div class="row nw" style="gap:14px"><svg id="donut" viewBox="0 0 120 120" width="130" height="130" style="flex-shrink:0"></svg><div class="legend" id="legend"></div></div></div>
+      </div>
+      <div class="grid g2 mb">
+        <div class="card"><div class="row sb"><h2 style="margin:0"><span data-i="globe"></span>اتصال فعال و پینگ هر TCP</h2><button class="btn s" onclick="go('tcp')">مدیریت TCP</button></div><div id="epBars" style="margin-top:12px"></div></div>
+        <div class="card"><h2><span data-i="server"></span>منابع سرور</h2><div class="gauges" id="gauges"></div></div>
+      </div>
+    </section>
+
+    <section data-tab="tcp" class="hide">
+      <div id="tokenBox"></div>
+      <div class="card mb"><div class="row sb"><div class="row">
+        <button class="btn p" id="btnNewTcp" onclick="newTcp()"></button><button class="btn" id="btnNewSocks" onclick="newTcp('socks')"></button><button class="btn" onclick="deviceTest()" id="btnDev"></button>
+        <button class="btn" onclick="serverCheck()"></button><button class="btn" onclick="refreshEps()" data-i="refresh"></button></div><span class="small mut" id="tcpCount"></span></div>
+        <div class="small mut" style="margin-top:10px">«بررسی از سرور» یه ClientHello واقعی Fake-TLS می‌فرسته و پاسخ خود پروکسی رو چک می‌کنه (نه فقط باز بودن پورت). برای «تست از دستگاه من» <b>VPN رو خاموش کن</b>. مطمئن‌ترین نشونه «کاربر واقعی»ه. TCPی که جواب نمیده رو «تعویض» کن، بدون ری‌دیپلوی.</div></div>
+      <div class="grid g3" id="eps"></div>
+      <div class="card" style="margin-top:14px"><h2><span data-i="edit"></span>افزودن دستی (بدون توکن)</h2>
+        <div class="small mut">اگه TCP رو خودت توی Railway ساختی: آدرس، پورت عمومی و پورت داخلی‌ای که بهش دادی (<span id="portRange" class="mono"></span>).</div>
+        <div class="row" style="margin-top:8px"><input class="f mono" id="mDom" placeholder="xxx.proxy.rlwy.net"><input class="mono" style="width:110px" id="mPort" placeholder="12345" inputmode="numeric"><input class="mono" style="width:110px" id="mApp" placeholder="3129" inputmode="numeric"><button class="btn" onclick="addManual()">افزودن</button></div></div>
+    </section>
+
+    <section data-tab="rall" class="hide">
+      <div class="card mb"><div class="row sb"><div class="row">
+        <button class="btn p" id="btnLive" onclick="rallLive()"></button><button class="btn" id="btnNow" onclick="rallNow()" data-i="zap">بررسی همین الان</button>
+        <button class="btn" id="btnRl" onclick="rallRefresh()" data-i="refresh">لیست جدید</button><button class="btn" onclick="rallCopy()" data-i="copy">کپی سالم‌ها</button></div>
+        <span class="small mut" id="rallInfo"></span></div>
+        <div class="row" style="margin-top:10px"><input id="rq" placeholder="جستجو: دامنه، پورت، سرویس..." oninput="renderRall()" style="max-width:280px">
+          <div class="seg" id="segRall"><button data-v="0" class="act">همه</button><button data-v="1">سالم</button><button data-v="2">مشکل‌دار</button></div></div>
+        <div class="sum" id="rallSum" style="margin-top:10px"></div>
+        <div class="small mut" style="margin-top:10px">همه‌ی TCPهای Railway یه‌جا لیست میشن و همه‌شون همزمان چک میشن، بدون محدودیت تعداد. TCPهای همین پنل با ClientHello واقعی Fake-TLS تست میشن. برای TCPهای سرویس‌های دیگه فقط باز بودن پورت معلومه، چون Railway پورت رو همیشه باز نشون میده.</div></div>
+      <div id="rallNote"></div>
+      <div class="card"><div id="rallList"></div></div>
+    </section>
+
+    <section data-tab="users" class="hide">
+      <div class="card mb"><div class="row sb"><input id="uq" placeholder="جستجوی کاربر..." oninput="renderUsers()" style="max-width:280px"><button class="btn p" onclick="userDlg()"></button></div></div>
+      <div class="card"><div id="users"></div></div>
+    </section>
+
+    <section data-tab="sponsor" class="hide">
+      <div class="grid g3">
+        <div class="card"><h2><span data-i="megaphone"></span>کانال‌های اسپانسر</h2><div id="spList"></div>
+          <label>افزودن / ویرایش</label><div class="row"><input id="spName" class="f mono" placeholder="اسم (مثلاً chanA)"><input id="spTag" class="f mono" placeholder="AD_TAG ۳۲ کاراکتر هگز">
+          <button class="btn p" onclick="saveSp()" data-i="plus">ذخیره</button></div>
+          <div class="small mut" style="margin-top:10px">هر کانال یه تگ جدا داره. تلگرام تگ رو برای هر سرور پروکسی می‌گیره، برای همین هر کانال یه پروسه‌ی جدا میشه و توی تب <b>TCP ها</b> برای هر TCP انتخاب می‌کنی کدوم کانال نشون داده بشه. TCPهایی که انتخاب نشدن از کانال پیش‌فرض (★) استفاده می‌کنن. حداکثر <span id="spMax"></span> کانال.</div></div>
+        <div class="card"><h2><span data-i="tag"></span>راهنمای ساخت تگ</h2>
+          <ol class="small" style="padding-right:18px;margin:0"><li>توی تلگرام به <b>@MTProxybot</b> پیام بده و <span class="mono">/newproxy</span> بفرست.</li><li>آدرس و secret پایین رو براش بفرست.</li><li>تگی که میده رو همین‌جا با یه اسم ذخیره کن.</li><li>توی ربات: <span class="mono">/myproxies</span> ← پروکسیت ← <b>Set promotion</b> ← چنل.</li><li>برای کانال بعدی، دوباره <span class="mono">/newproxy</span> با آدرس یه TCP دیگه بزن.</li></ol>
+          <label>انتخاب TCP</label><select id="regEp" onchange="renderSponsor()" style="max-width:100%;width:100%"></select>
+          <label>host:port</label><div class="linkrow"><span class="mono" style="flex:1" id="hp">-</span><button class="btn s" onclick="copy($('hp').textContent)" data-i="copy"></button></div>
+          <label>secret</label><div class="linkrow"><span class="mono" style="flex:1" id="rs">-</span><button class="btn s" onclick="copy($('rs').textContent)" data-i="copy"></button></div></div>
+      </div>
+    </section>
+
+    <section data-tab="settings" class="hide"><div class="grid g3">
+      <div class="card"><h2><span data-i="key"></span>اتصال به Railway</h2><div class="small mut">با توکن، ساخت، حذف و تعویض TCP از همین پنل انجام میشه.<br>Railway ← Account Settings ← Tokens ← Create Token</div>
+        <label>توکن <span id="tokState"></span></label><input id="tok" type="password" class="mono" placeholder="••••••••" autocomplete="off">
+        <div class="row" style="margin-top:10px"><button class="btn p" onclick="saveToken()">ذخیره و تست</button><button class="btn d" onclick="$('tok').value='';saveToken()">حذف توکن</button></div></div>
+      <div class="card"><h2><span data-i="shield"></span>Fake-TLS</h2><label>دامنه‌ی استتار</label><input id="dom" class="mono"><div class="small mut" style="margin-top:6px">با عوض کردنش لینک همه‌ی کاربرها عوض میشه.</div><button class="btn p" style="margin-top:10px" onclick="saveDom()">ذخیره</button></div>
+      <div class="card"><h2><span data-i="lock"></span>رمز پنل</h2><label>رمز فعلی</label><input id="pw0" type="password"><label>رمز جدید (حداقل ۶ کاراکتر)</label><input id="pw1" type="password"><button class="btn p" style="margin-top:10px" onclick="changePw()">تغییر رمز</button></div>
+      <div class="card"><h2><span data-i="download"></span>بکاپ</h2><div class="small mut">کاربرها، مصرف، اسپانسرها و TCPها. توکن Railway هم داخلشه، جای امن نگهش دار.</div>
+        <div class="row" style="margin-top:10px"><a class="btn" href="/api/backup" data-i="download">دانلود</a><label class="btn" style="margin:0;color:var(--txt)"><span data-i="upload"></span>بازگردانی<input type="file" accept=".json,application/json" class="hide" onchange="restore(this)"></label></div></div>
+      <div class="card"><h2><span data-i="server"></span>سیستم</h2><div id="sysBox" class="small"></div><button class="btn d" style="margin-top:10px" onclick="restartProxy()">ریستارت پروکسی</button></div>
+    </div></section>
+
+    <section data-tab="logs" class="hide"><div class="grid g2"><div class="card"><h2><span data-i="clock"></span>رویدادها</h2><div id="events" class="log"></div></div>
+      <div class="card"><h2><span data-i="terminal"></span>لاگ پروکسی</h2><div class="log mono" id="log"></div></div></div></section>
+  </main>
+  <nav class="bnav" id="bnav"></nav>
+</div>
+<dialog id="dlg"><h2 id="dT"></h2><div id="dB"></div><div class="row" style="margin-top:16px" id="dF"></div></dialog>
+
+<script>
+const $=id=>document.getElementById(id),$$=s=>[...document.querySelectorAll(s)],sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let ST,TAB='dash',CM=1,CR=86400,CH=null,DEV=JSON.parse(localStorage.npDev||'{}');
+const IC={grid:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.4c1.8.8 3 2.6 3 5.6"/>',
+megaphone:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
+sliders:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+terminal:'<path d="M4 17l6-5-6-5M12 19h8"/>',plane:'<path d="M21 3 3 10.5l6.5 2.5L12 20z"/><path d="M9.5 13 21 3"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+moon:'<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',plus:'<path d="M12 5v14M5 12h14"/>',
+refresh:'<path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/>',copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',
+link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+pause:'<path d="M8 5v14M16 5v14"/>',play:'<path d="M7 4l13 8-13 8z"/>',more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+download:'<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',upload:'<path d="M12 16V5M7 9l5-5 5 5M5 20h14"/>',activity:'<path d="M3 12h4l3-8 4 16 3-8h4"/>',
+zap:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',db:'<ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+server:'<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ban:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>',key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+edit:'<path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/>',logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>',
+pie:'<path d="M12 3v9h9a9 9 0 1 1-9-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',qr:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M14 21h3M21 17v4"/>',
+users2:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+nul:'<circle cx="12" cy="12" r="8"/><path d="M6.3 17.7 17.7 6.3"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>'};
+const ic=(n,s=16)=>`<svg class="ic" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
+const ib=(n,t)=>ic(n,15)+(t?`<span>${t}</span>`:'');
+const fa=(n,d=0)=>Number(n||0).toLocaleString('fa-IR',{maximumFractionDigits:d});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const q=s=>esc(JSON.stringify(String(s)));
+const bytes=b=>{b=+b||0;const u=['B','KB','MB','GB','TB'];let i=0;while(b>=1024&&i<4){b/=1024;i++}return fa(b,b<10&&i?1:0)+' '+u[i]};
+const dur=s=>{s=+s||0;const d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);return d?fa(d)+' روز '+fa(h)+' ساعت':h?fa(h)+' ساعت '+fa(m)+' دقیقه':fa(m)+' دقیقه'};
+const ago=ts=>{if(!ts)return 'هرگز';const s=Date.now()/1000-ts;return s<60?'همین الان':s<3600?fa(s/60)+' دقیقه پیش':s<86400?fa(s/3600)+' ساعت پیش':fa(s/86400)+' روز پیش'};
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const toast=t=>{const x=$('toast');x.textContent=t;x.classList.add('show');clearTimeout(x._t);x._t=setTimeout(()=>x.classList.remove('show'),2400)};
+async function api(path,method='GET',body){const r=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,credentials:'same-origin'});
+  if(r.status===401){show(false);throw'auth'}const j=await r.json().catch(()=>({}));if(!r.ok){toast(j.error||'خطا');throw j}return j}
+const act=async(fn,msg)=>{try{await fn();msg&&toast(msg);load()}catch(e){}};
+function show(app){$('app').classList.toggle('hide',!app);$('loginView').classList.toggle('hide',app);if(!app)setTimeout(()=>$('pw').focus(),50)}
+const login=async()=>{try{await api('/api/login','POST',{password:$('pw').value});$('pw').value='';show(true);load(true)}catch(e){}};
+$('pw').addEventListener('keydown',e=>e.key==='Enter'&&login());
+const logout=async()=>{await api('/api/logout','POST');show(false)};
+function copy(t){if(!t||t==='-')return;const fb=()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();document.execCommand('copy');a.remove();toast('کپی شد')};
+  navigator.clipboard?navigator.clipboard.writeText(t).then(()=>toast('کپی شد'),fb):fb()}
+const dark=()=>!document.documentElement.classList.contains('light');
+function toggleTheme(){const l=document.documentElement.classList.toggle('light');localStorage.npTheme=l?'light':'dark';themeIcon();drawAll()}
+const themeIcon=()=>{$('themeBtn').innerHTML=ic(dark()?'sun':'moon')};
+if(localStorage.npTheme==='light')document.documentElement.classList.add('light');
+$$('[data-i]').forEach(e=>e.innerHTML=ic(e.dataset.i,+e.dataset.s||15)+e.innerHTML);themeIcon();
+$('btnNewTcp').innerHTML=ib('plus','TCP جدید (MTProto)');$('btnNewSocks').innerHTML=ib('plus','TCP جدید (SOCKS5)');$('btnDev').innerHTML=ib('phone','تست از دستگاه من');$('btnDev').nextElementSibling.innerHTML=ib('activity','بررسی از سرور');
+$('themeBtn').nextElementSibling.title='خروج';$$('.btn.p[onclick="userDlg()"]').forEach(b=>b.innerHTML=ib('plus','کاربر جدید'));
+
+const TABS=[['dash','grid','داشبورد'],['tcp','globe','TCP ها'],['rall','list','Railway'],['users','users','کاربرها'],['sponsor','megaphone','اسپانسر'],['settings','sliders','تنظیمات'],['logs','terminal','لاگ']];
+const nav=TABS.map(t=>`<button data-t="${t[0]}" onclick="go('${t[0]}')">${ic(t[1],18)}<span>${t[2]}</span></button>`).join('');$('nav').innerHTML=nav;$('bnav').innerHTML=nav;
+function go(t){if(!TABS.some(x=>x[0]===t))t='dash';TAB=t;history.replaceState(null,'','#'+t);$$('section[data-tab]').forEach(s=>s.classList.toggle('hide',s.dataset.tab!==t));
+  $$('[data-t]').forEach(b=>b.classList.toggle('act',b.dataset.t===t));$('pageTitle').textContent=TABS.find(x=>x[0]===t)[2];window.scrollTo(0,0);drawAll();if(t==='rall')rallEnter()}
+const seg=(id,cb)=>$$('#'+id+' button').forEach(b=>b.onclick=()=>{$$('#'+id+' button').forEach(x=>x.classList.remove('act'));b.classList.add('act');cb(+b.dataset.v)});
+seg('segMode',v=>{CM=v;drawChart()});seg('segRange',v=>{CR=v;drawChart()});
+
+async function load(first){let s;try{s=await api('/api/state')}catch(e){return}ST=s;show(true);
+  $('status').className='pill '+(s.running?'ok':'bad');$('statusTxt').textContent=s.running?'پروکسی روشن':'پروکسی خاموش';
+  if(first){$('dom').value=s.tls_domain;$('portRange').textContent=s.entry_ports.join('-');$('spMax').textContent=fa(s.max_sponsors)}
+  $('sideInfo').innerHTML=`آپتایم پنل: ${dur(s.panel_uptime)}<br>Null Proxy`;drawAll()}
+function drawAll(){if(!ST)return;try{({dash:()=>{renderKpis();drawChart();drawDonut();renderEpBars();renderGauges()},tcp:renderEps,rall:renderRall,users:renderUsers,sponsor:renderSponsor,settings:renderSettings,logs:renderLogs})[TAB]()}catch(e){console.error(e)}}
+
+// verdict: lvl 0 bad, 1 unknown/warn, 2+ confirmed
+function verdict(e){const now=Date.now()/1000,dv=DEV[e.key],c=e.check;
+  if(e.bad_port)return{lvl:0,cls:'bad',t:'پورت داخلی خارج از محدوده'};
+  if(c.mode==='down')return{lvl:0,cls:'bad',t:'از سمت سرور وصل نمیشه'};
+  if(e.last_good&&now-e.last_good<3600)return{lvl:3,cls:'ok',t:'کار می‌کنه (کاربر واقعی وصل بوده)'};
+  if(dv&&now-dv.ts<3600)return dv.ok?{lvl:2,cls:'ok',t:'از دستگاه تو باز میشه'}:{lvl:0,cls:'bad',t:'از اینترنت تو جواب نمیده، عوضش کن'};
+  if(c.mode==='ok')return{lvl:1,cls:'warn',t:'پروکسی جواب میده، از ایران تست نشده'};
+  if(c.mode==='tcp')return{lvl:1,cls:'warn',t:'پورت بازه ولی پروکسی جواب نداد'};
+  return{lvl:1,cls:'',t:'در انتظار بررسی...'}}
+const dcls=v=>v.lvl>=2?'ok':v.lvl===0?'bad':'warn';
+
+// ---- dashboard ----
+function spark(v,op){if(v.length<2)return'';const mx=Math.max(1,...v),d=v.map((x,i)=>`${i?'L':'M'}${(i/(v.length-1)*100).toFixed(2)} ${(38-x/mx*30).toFixed(2)}`).join(' ');
+  return `<svg class="sp" viewBox="0 0 100 38" preserveAspectRatio="none"><path d="${d} L100 38 L0 38Z" fill="currentColor" opacity=".08"/><path d="${d}" fill="none" stroke="currentColor" opacity="${op}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`}
+function renderKpis(){const s=ST,t=s.totals,se=s.series.slice(-90),rate=se.length?se.at(-1)[2]:0,okEp=s.endpoints.filter(e=>verdict(e).lvl>=2).length,on=s.users.filter(u=>u.enabled).length;
+  $('kpis').innerHTML=[['activity','اتصال فعال',fa(t.curr),'نامعتبر: '+fa(t.connects_bad)+' از '+fa(t.connects_all),spark(se.map(p=>p[1]),.9)],['zap','سرعت',bytes(rate)+'/s','لحظه‌ای',spark(se.map(p=>p[2]),.5)],
+   ['db','مصرف کل',bytes(t.usage),'با ری‌استارت پاک نمیشه',''],['globe','TCP سالم',fa(okEp)+' از '+fa(s.endpoints.length),'تأییدشده با کاربر یا دستگاه',''],
+   ['users','کاربر فعال',fa(on)+' از '+fa(s.users.length),'',''],['clock','آپتایم پروکسی',dur(s.proxy_uptime),fa(s.instances)+' پروسه · ریستارت: '+fa(s.restarts),'']].map(x=>`<div class="card kpi"><div class="k"><span class="ib">${ic(x[0])}</span>${x[1]}</div><div class="v">${x[2]}</div><div class="s">${x[3]}</div>${x[4]}</div>`).join('')}
+function drawChart(){const svg=$('chart'),now=Date.now()/1000,pts=ST.series.filter(p=>p[0]>=now-CR).map(p=>[p[0],p[CM]]),c=cssv('--pri'),line=cssv('--line2'),mut=cssv('--mut');
+  if(pts.length<2){svg.innerHTML=`<text x="500" y="115" text-anchor="middle" fill="${mut}" font-size="18">داده هنوز کافی نیست، چند دقیقه صبر کن</text>`;$('cFrom').textContent=$('cMax').textContent='';CH=null;return}
+  const x0=pts[0][0],x1=pts.at(-1)[0],mx=Math.max(1,...pts.map(p=>p[1]))*1.15,X=t=>(t-x0)/((x1-x0)||1)*1000,Y=v=>222-v/mx*205,d=pts.map((p,i)=>`${i?'L':'M'}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(' ');
+  let grid='';for(let i=1;i<=3;i++){const y=222-i*205/4;grid+=`<line x1="0" x2="1000" y1="${y}" y2="${y}" stroke="${line}" stroke-dasharray="3 7" vector-effect="non-scaling-stroke"/>`}
+  svg.innerHTML=`<defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c}" stop-opacity=".28"/><stop offset="1" stop-color="${c}" stop-opacity="0"/></linearGradient></defs>${grid}
+   <path d="${d} L1000 230 L0 230Z" fill="url(#gA)"/><path d="${d}" fill="none" stroke="${c}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><line id="cur" y1="0" y2="230" stroke="${mut}" vector-effect="non-scaling-stroke" opacity="0"/>`;
+  CH={pts,X,Y};$('cFrom').textContent='از '+new Date(x0*1000).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
+  $('cMax').textContent='بیشترین: '+(CM===1?fa(Math.max(...pts.map(p=>p[1])))+' اتصال':bytes(Math.max(...pts.map(p=>p[1])))+'/s')}
+$('chart').addEventListener('mousemove',ev=>{if(!CH)return;const r=$('chart').getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*1000;let b=CH.pts[0];
+  for(const p of CH.pts)if(Math.abs(CH.X(p[0])-x)<Math.abs(CH.X(b[0])-x))b=p;const tip=$('tip');tip.style.opacity=1;tip.style.left=CH.X(b[0])/1000*r.width+'px';tip.style.top=CH.Y(b[1])/230*r.height+'px';
+  tip.textContent=new Date(b[0]*1000).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})+' · '+(CM===1?fa(b[1])+' اتصال':bytes(b[1])+'/s');
+  const c=$('cur');c.setAttribute('x1',CH.X(b[0]));c.setAttribute('x2',CH.X(b[0]));c.setAttribute('opacity',.6)});
+$('chart').addEventListener('mouseleave',()=>{$('tip').style.opacity=0;$('cur')?.setAttribute('opacity',0)});
+const shade=i=>`hsl(0 0% ${dark()?96-i*11:8+i*10}%)`;
+function drawDonut(){const us=ST.users.filter(u=>u.usage>0).sort((a,b)=>b.usage-a.usage).slice(0,8),tot=ST.users.reduce((a,u)=>a+u.usage,0),R=46,C=2*Math.PI*R;
+  if(!tot){$('donut').innerHTML=`<circle cx="60" cy="60" r="${R}" fill="none" stroke="${cssv('--line')}" stroke-width="12"/><text x="60" y="65" text-anchor="middle" font-size="11" fill="${cssv('--mut')}">بدون مصرف</text>`;$('legend').innerHTML='';return}
+  let off=0;const h=us.map((u,i)=>{const l=u.usage/tot*C,s=`<circle cx="60" cy="60" r="${R}" fill="none" stroke="${shade(i)}" stroke-width="12" stroke-dasharray="${Math.max(0,l-1)} ${C-l+1}" stroke-dashoffset="${-off}" transform="rotate(-90 60 60)"/>`;off+=l;return s}).join('');
+  $('donut').innerHTML=h+`<text x="60" y="58" text-anchor="middle" font-size="13" font-weight="800" fill="${cssv('--txt')}">${bytes(tot)}</text><text x="60" y="74" text-anchor="middle" font-size="9" fill="${cssv('--mut')}">کل مصرف</text>`;
+  $('legend').innerHTML=us.map((u,i)=>`<div><i style="background:${shade(i)}"></i><b>${esc(u.name)}</b> <span class="mut">${bytes(u.usage)} · ${fa(u.usage/tot*100)}٪</span></div>`).join('')}
+function renderEpBars(){const eps=ST.endpoints;if(!eps.length){$('epBars').innerHTML='<div class="empty">TCPی وجود نداره</div>';return}const mx=Math.max(1,...eps.map(e=>e.curr));
+  $('epBars').innerHTML=eps.map(e=>{const v=verdict(e);return `<div style="margin-bottom:12px"><div class="row sb small"><span><span class="dot ${dcls(v)}"></span> <span class="mono">${esc((e.alias||e.domain)+':'+e.port)}</span> ${e.primary?'<span class="pill inv">اصلی</span>':''}</span>
+   <span class="row" style="gap:8px">${e.check.mode==='ok'?`<span class="mut mono">${fa(e.check.ms)}ms</span>`:''}<b>${fa(e.curr)} اتصال</b></span></div><div class="bar" style="margin-top:5px"><i style="width:${e.curr/mx*100}%"></i></div></div>`}).join('')}
+function gauge(val,max,label,sub){const p=max?Math.min(1,val/max):0,L=Math.PI*42,col=p>.85?cssv('--bad'):p>.6?cssv('--warn'):cssv('--txt');
+  return `<div style="text-align:center"><svg viewBox="0 0 100 60" width="140" height="84"><path d="M8 54 A42 42 0 0 1 92 54" fill="none" stroke="${cssv('--line')}" stroke-width="8" stroke-linecap="round"/>
+  <path d="M8 54 A42 42 0 0 1 92 54" fill="none" stroke="${col}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${p*L} ${L}"/><text x="50" y="50" text-anchor="middle" font-size="15" font-weight="800" fill="${cssv('--txt')}">${max?fa(p*100)+'٪':'—'}</text></svg><div><b>${label}</b></div><div class="small mut">${sub}</div></div>`}
+function renderGauges(){const y=ST.sys;$('gauges').innerHTML=gauge(y.cpu??0,y.cpu==null?0:100,'CPU',y.cpu==null?'نامشخص':fa(y.cpu,1)+'٪')+gauge(y.mem||0,y.mem_max||0,'RAM',y.mem?bytes(y.mem)+(y.mem_max?' از '+bytes(y.mem_max):''):'نامشخص')}
+
+// ---- TCP ----
+function renderEps(){const s=ST,rw=s.railway,ds=s.default_sponsor;
+  $('tokenBox').innerHTML=!rw.token_set?`<div class="alert">${ic('key')} برای ساخت، حذف و تعویض TCP از همین‌جا، توکن Railway رو توی <a href="#settings" onclick="go('settings');return false">تنظیمات</a> بذار.</div>`:rw.err?`<div class="alert">خطای Railway: ${esc(rw.err)}</div>`:'';
+  $('btnNewTcp').disabled=$('btnNewSocks').disabled=!rw.token_set;$('tcpCount').textContent=fa(s.endpoints.length)+' TCP · حداکثر '+fa(s.max_endpoints);
+  if(!s.endpoints.length){$('eps').innerHTML='<div class="card empty">هنوز TCPی نیست.</div>';return}
+  $('eps').innerHTML=s.endpoints.map(e=>{const v=verdict(e),dv=DEV[e.key],c=e.check,k=q(e.key);
+    const hist=(c.hist||[]).map(m=>m<0?'<i class="x"></i>':`<i style="height:${Math.max(15,Math.min(100,m/4))}%"></i>`).join('');
+    const sel=`<select onchange='setSp(${k},this.value)'><option value="">پیش‌فرض${ds?' ('+esc(ds)+')':''}</option><option value="-"${e.sponsor_set==='-'?' selected':''}>بدون اسپانسر</option>${s.sponsors.map(x=>`<option${e.sponsor_set===x.name?' selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+    return `<div class="card ep ${e.primary?'prim':''}">
+     <div class="row sb"><div><div class="host mono">${esc(e.alias||e.domain)}<span class="mut">:${e.port}</span></div>${e.alias?`<div class="small mut mono">${esc(e.domain)}</div>`:''}</div>
+      <div class="row" style="gap:6px">${e.primary?`<span class="pill inv">${ic('star',12)}اصلی</span>`:''}<span class="pill">${e.kind==='socks'?'SOCKS5':'MTProto'}</span><span class="pill">${{railway:'Railway',manual:'دستی'}[e.source]||'پیش‌فرض'}</span></div></div>
+     <div class="verdict ${v.cls}">${v.t}</div>
+     <div class="stl"><span>${ic('activity',14)}پینگ واقعی (Fake-TLS)</span><span class="row" style="gap:8px">${c.ts?(c.mode==='ok'?`<span class="dot ok"></span>${fa(c.ms)}ms`:c.mode==='tcp'?'<span class="dot warn"></span>بدون پاسخ':'<span class="dot bad"></span>قطع'):'<span class="mut">—</span>'}<span class="hist">${hist}</span></span></div>
+     <div class="stl"><span>${ic('phone',14)}از دستگاه تو</span><span>${dv?(dv.ok?`<span class="dot ok"></span> ${fa(dv.ms)}ms · ${ago(dv.ts)}`:`<span class="dot bad"></span> جواب نداد · ${ago(dv.ts)}`):'<span class="mut">تست نشده</span>'}</span></div>
+     <div class="stl"><span>${ic('users',14)}کاربر واقعی</span><span>${fa(e.curr)} فعال · آخرین: ${ago(e.last_good)}</span></div>
+     <div class="stl"><span>${ic('db',14)}ترافیک</span><span>${bytes(e.bytes)} · ${fa(e.good)} اتصال موفق</span></div>
+     <div class="stl"><span>${ic('shield',14)}نوع پروکسی</span><select onchange='setKind(${k},this.value)'><option value="mtproto"${e.kind!=='socks'?' selected':''}>MTProto (تلگرام)</option><option value="socks"${e.kind==='socks'?' selected':''}>SOCKS5 (همه‌جا)</option></select></div>
+     ${e.kind==='socks'?'':`<div class="stl"><span>${ic('megaphone',14)}کانال اسپانسر</span>${sel}</div>`}
+     <div class="acts" style="justify-content:flex-start"><button class="btn s p" onclick='copyMain(${k})'>${ib('copy','کپی لینک')}</button>
+      ${e.primary?'':`<button class="btn s" onclick='act(()=>api("/api/endpoints/primary","POST",{key:${k}}),"TCP اصلی عوض شد")'>${ib('star','اصلی کن')}</button>`}
+      <button class="btn s" onclick='aliasDlg(${k})'>${ib('globe','دامنه‌ی خودم')}</button>
+      ${e.source==='railway'?`<button class="btn s" onclick='replaceEp(${k})'>${ib('refresh','تعویض')}</button>`:''}
+      ${e.source!=='env'?`<button class="btn s d" onclick='delEp(${k})'>${ib('trash','حذف')}</button>`:''}</div></div>`}).join('')}
+const refreshEps=()=>act(()=>api('/api/endpoints/refresh','POST'),'بروزرسانی شد');
+const setKind=(k,v)=>act(()=>api('/api/endpoints/kind','POST',{key:k,kind:v}),'نوع TCP عوض شد');
+const setSp=(k,v)=>act(()=>api('/api/endpoints/sponsor','POST',{key:k,sponsor:v}),'کانال اسپانسر عوض شد');
+async function newTcp(kind){const sk=kind==='socks',b=$(sk?'btnNewSocks':'btnNewTcp'),t=sk?'TCP جدید (SOCKS5)':'TCP جدید (MTProto)';b.disabled=true;b.innerHTML='<span class="spin"></span> در حال ساخت...';
+  try{const r=await api('/api/endpoints','POST',{kind});toast('TCP جدید: '+r.endpoint.domain+':'+r.endpoint.proxyPort);await load()}catch(e){}finally{b.innerHTML=ib('plus',t);b.disabled=!ST.railway.token_set}}
+async function replaceEp(k){if(!confirm('این TCP حذف و یه TCP جدید جاش ساخته میشه. لینک کاربرهایی که از این TCP استفاده می‌کردن عوض میشه. ادامه؟'))return;
+  toast('در حال تعویض...');try{const r=await api('/api/endpoints/replace','POST',{key:k});delete DEV[k];saveDev();toast('TCP جدید: '+r.endpoint.domain+':'+r.endpoint.proxyPort);load()}catch(e){}}
+async function delEp(k){if(!confirm('حذف '+k+'؟'))return;delete DEV[k];saveDev();act(()=>api('/api/endpoints/'+encodeURIComponent(k),'DELETE'),'حذف شد')}
+async function serverCheck(){await api('/api/endpoints/check','POST');toast('بررسی شروع شد...');for(let i=0;i<9;i++){await sleep(700);await load()}}
+function copyMain(k){const u=ST.users.find(x=>x.enabled)||ST.users[0],l=u?.links.find(x=>x.key===k);l&&copy(l.url||l.link)}
+const addManual=()=>act(async()=>{await api('/api/endpoints/manual','POST',{domain:$('mDom').value,port:$('mPort').value,app_port:$('mApp').value||ST.entry_ports[0]});['mDom','mPort','mApp'].forEach(i=>$(i).value='')},'اضافه شد');
+function aliasDlg(k){const e=ST.endpoints.find(x=>x.key===k);dialog('دامنه‌ی خودت برای این TCP',
+  `<div class="small mut">۱. توی DNS دامنه‌ت یه رکورد <b>CNAME</b> بساز که به <span class="mono">${esc(e.domain)}</span> اشاره کنه.<br>۲. روی Cloudflare حتماً <b>DNS only (ابر خاکستری)</b>.<br>۳. اینجا بنویسش. پورت همون <span class="mono">${e.port}</span> می‌مونه.</div>
+   <label>دامنه (خالی = آدرس Railway)</label><input id="aIn" class="mono" value="${esc(e.alias)}" placeholder="proxy.example.com">`,
+  [['ذخیره','p',()=>api('/api/endpoints/alias','POST',{key:k,alias:$('aIn').value}).then(()=>{toast('ذخیره شد');load()})]])}
+const saveDev=()=>localStorage.npDev=JSON.stringify(DEV);
+const UNSAFE=new Set([1,7,9,11,13,15,17,19,20,21,22,23,25,37,42,43,53,69,77,79,87,95,101,102,103,104,109,110,111,113,115,117,119,123,135,137,139,143,161,179,389,427,465,512,513,514,515,526,530,531,532,540,548,554,556,563,587,601,636,989,990,993,995,1719,1720,1723,2049,3659,4045,4190,5060,5061,6000,6566,6665,6666,6667,6668,6669,6679,6697,10080]);
+async function probe(host,port){if(UNSAFE.has(port))return{ok:null};const t0=performance.now(),ac=new AbortController(),to=setTimeout(()=>ac.abort(),7000);
+  try{await fetch(`https://${host}:${port}/?pz=${Math.random()}`,{mode:'no-cors',cache:'no-store',signal:ac.signal});return{ok:true,ms:Math.round(performance.now()-t0)}}
+  catch(e){return{ok:!ac.signal.aborted,ms:Math.round(performance.now()-t0)}}finally{clearTimeout(to)}}
+async function deviceTest(){const eps=ST.endpoints;if(!eps.length)return;const b=$('btnDev');b.disabled=true;b.innerHTML='<span class="spin"></span> در حال تست...';
+  try{await api('/api/endpoints/probe','POST',{keys:eps.map(e=>e.key)}).catch(()=>{});
+    await Promise.all(eps.map(async e=>{const r=await probe(e.alias||e.domain,e.port);if(r.ok!==null)DEV[e.key]={ok:r.ok,ms:r.ms,ts:Date.now()/1000}}));
+    saveDev();toast(`${fa(eps.filter(e=>DEV[e.key]?.ok).length)} از ${fa(eps.length)} TCP از دستگاه تو باز میشه`);renderEps()}finally{b.disabled=false;b.innerHTML=ib('phone','تست از دستگاه من')}}
+
+// ---- Railway: every TCP, probed live ----
+const RALL={d:null,live:true,loop:false,seg:0};
+function rstat(r){const c=r.check||{},now=Date.now()/1000;
+  if(!c.ts)return{k:'wait',cls:'',t:'در انتظار...'};
+  if(c.mode==='down')return{k:'bad',cls:'bad',t:'قطع'};
+  if(c.mode==='ok')return{k:'ok',cls:'ok',t:r.mine&&r.last_good&&now-r.last_good<3600?'کار می‌کنه (کاربر واقعی)':'پروکسی جواب میده'};
+  return r.mine?{k:'warn',cls:'warn',t:'پورت بازه ولی پروکسی جواب نداد'}:{k:'open',cls:'warn',t:'پورت بازه (سرویس دیگه)'}}
+function rrow(r){const s=rstat(r),c=r.check||{},host=r.alias||r.domain,where=[r.project,r.service].filter(Boolean).join(' / ');
+  const hist=(c.hist||[]).slice(-20).map(m=>m<0?'<i class="x"></i>':`<i style="height:${Math.max(15,Math.min(100,m/4))}%"></i>`).join('');
+  return `<div class="rr"><span class="dot ${s.cls}"></span><div class="rm"><div class="mono"><b>${esc(host)}</b><span class="mut">:${r.port}</span>${r.mine?' <span class="pill inv">این پنل</span>':''}${r.kind==='socks'?' <span class="pill">SOCKS5</span>':''}</div>
+   <div class="small mut">${esc(where)||'—'}${r.app_port?' · پورت داخلی '+fa(r.app_port):''}</div></div>
+   <div class="row" style="gap:10px">${c.mode==='ok'?`<b class="mono">${fa(c.ms)}ms</b>`:''}<span class="hist">${hist}</span></div>
+   <span class="pill ${s.cls}">${s.t}</span><button class="btn s" onclick='copy(${q(host+':'+r.port)})'>${ic('copy',14)}</button></div>`}
+function renderRall(){const d=RALL.d,L=$('rallList');
+  $('btnLive').innerHTML=RALL.live?ib('pause','توقف بررسی زنده'):ib('play','شروع بررسی زنده');
+  if(!d){L.innerHTML='<div class="empty"><span class="spin"></span> در حال خواندن لیست از Railway...</div>';$('rallSum').innerHTML='';$('rallInfo').textContent='';return}
+  const sc={account:'کل اکانت Railway',project:'همین پروژه',service:'فقط همین سرویس',none:'فقط TCPهای همین پنل'}[d.scope]||'',all=d.rows,sts=all.map(rstat),n=k=>sts.filter(x=>x.k===k).length;
+  $('rallNote').innerHTML=!d.token?`<div class="alert">${ic('key')} برای دیدن همه‌ی TCPهای Railway، توکن رو توی <a href="#settings" onclick="go('settings');return false">تنظیمات</a> بذار. الان فقط TCPهای همین پنل چک میشن.</div>`
+    :d.err?`<div class="alert">خطای Railway: ${esc(d.err)}</div>`
+    :d.scope&&d.scope!=='account'?`<div class="alert small">با این توکن فقط ${esc(sc)} دیده میشه. برای دیدن کل اکانت یه <b>Account token</b> (نه Project token) بذار.</div>`:'';
+  $('rallSum').innerHTML=`<span class="pill inv">${fa(all.length)} TCP</span><span class="pill ok"><span class="dot ok"></span>${fa(n('ok'))} سالم</span><span class="pill warn"><span class="dot warn"></span>${fa(n('warn')+n('open'))} بدون پاسخ</span><span class="pill bad"><span class="dot bad"></span>${fa(n('bad'))} قطع</span>${n('wait')?`<span class="pill">${fa(n('wait'))} در انتظار</span>`:''}`;
+  $('rallInfo').innerHTML=(sc?esc(sc)+' · ':'')+(d.run&&d.run.on?`<span class="spin"></span> ${fa(d.run.done)} از ${fa(d.run.total)}`:RALL.live?'بررسی زنده فعاله':'متوقف');
+  const f=($('rq').value||'').toLowerCase().trim(),rows=all.filter((r,i)=>{const k=sts[i].k;
+    if(RALL.seg===1&&k!=='ok')return false;if(RALL.seg===2&&!['bad','warn','open'].includes(k))return false;
+    return !f||(r.domain+':'+r.port+' '+(r.alias||'')+' '+r.project+' '+r.service+' '+r.env).toLowerCase().includes(f)});
+  L.innerHTML=rows.length?rows.map(rrow).join(''):`<div class="empty">${all.length?'چیزی پیدا نشد':'TCPی توی Railway نیست'}</div>`}
+async function rallRound(refresh){let r=await api('/api/rwall/check','POST',{refresh:!!refresh});RALL.d=r;renderRall();
+  for(let i=0;i<60&&r.run&&r.run.on&&TAB==='rall';i++){await sleep(350);r=await api('/api/rwall');RALL.d=r;renderRall()}}
+async function rallLoop(){if(RALL.loop)return;RALL.loop=true;
+  try{while(TAB==='rall'&&RALL.live&&!document.hidden&&!$('app').classList.contains('hide')){
+    try{await rallRound();await sleep(500)}catch(e){if(e==='auth')break;await sleep(3000)}}}finally{RALL.loop=false}}
+function rallEnter(){api('/api/rwall').then(r=>{RALL.d=r;renderRall()}).catch(()=>{}).finally(()=>{if(TAB==='rall'&&RALL.live)rallLoop()})}
+function rallLive(){RALL.live=!RALL.live;renderRall();if(RALL.live)rallLoop()}
+async function rallNow(){if(RALL.loop)return toast('بررسی زنده خودش همین الان چک می‌کنه');const b=$('btnNow');b.disabled=true;try{await rallRound()}catch(e){}finally{b.disabled=false}}
+async function rallRefresh(){const b=$('btnRl');b.disabled=true;b.innerHTML='<span class="spin"></span>';try{RALL.d=await api('/api/rwall?refresh=1');renderRall();toast('لیست بروز شد')}catch(e){}finally{b.disabled=false;b.innerHTML=ib('refresh','لیست جدید')}}
+function rallCopy(){const ok=(RALL.d?.rows||[]).filter(r=>rstat(r).k==='ok').map(r=>(r.alias||r.domain)+':'+r.port);ok.length?copy(ok.join('\n')):toast('هنوز TCP سالمی تأیید نشده')}
+seg('segRall',v=>{RALL.seg=v;renderRall()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&TAB==='rall'&&RALL.live)rallLoop()});
+
+// ---- users ----
+const avatarBg=n=>{let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))%60;return `hsl(0 0% ${dark()?10+h/3:90-h/3}%)`};
+function ustatus(u){if(!u.enabled)return u.reason==='quota'?['bad','سقف ترافیک']:u.reason==='expired'?['bad','منقضی']:['warn','غیرفعال'];
+  if(u.expires){const d=Math.ceil((new Date(u.expires+'T23:59:59')-Date.now())/864e5);if(d<=3)return['warn',fa(Math.max(0,d))+' روز مونده']}return['ok','فعال']}
+function renderUsers(){const f=($('uq').value||'').toLowerCase(),us=ST.users.filter(u=>!f||u.name.toLowerCase().includes(f)||(u.note||'').toLowerCase().includes(f));
+  if(!us.length){$('users').innerHTML='<div class="empty">کاربری پیدا نشد</div>';return}
+  $('users').innerHTML=us.map(u=>{const st=ustatus(u),qb=u.quota_gb*1073741824,pc=qb?Math.min(100,u.usage/qb*100):0,n=q(u.name);
+    return `<div class="user ${u.enabled?'':'off'}"><div class="row nw"><div class="avatar" style="background:${avatarBg(u.name)}">${esc(u.name[0])}</div><div style="min-width:0"><b>${esc(u.name)}</b> <span class="pill ${st[0]}">${st[1]}</span><div class="small mut">${esc(u.note)||'—'}</div></div></div>
+     <div class="small"><div>${fa(u.curr)} اتصال فعال</div><div class="mut">${u.max_conns?'سقف '+fa(u.max_conns)+' اتصال':'بدون سقف اتصال'}${u.expires?' · تا '+new Date(u.expires).toLocaleDateString('fa-IR'):''}</div></div>
+     <div class="small"><div class="row sb"><span>${bytes(u.usage)}</span><span class="mut">${qb?'از '+fa(u.quota_gb,1)+' GB':'نامحدود'}</span></div>${qb?`<div class="bar ${pc>85?'hot':''}" style="margin-top:5px"><i style="width:${pc}%"></i></div>`:''}</div>
+     <div class="acts"><button class="btn s p" onclick='linksDlg(${n})'>${ib('link','لینک‌ها')}</button><button class="btn s" onclick='userDlg(${n})'>${ib('edit','ویرایش')}</button>
+      <button class="btn s" onclick='uAct(${n},"toggle")'>${u.enabled?ib('pause','غیرفعال'):ib('play','فعال')}</button><button class="btn s" onclick='uMore(${n})'>${ic('more',15)}</button></div></div>`}).join('')}
+const uMore=n=>dialog('بیشتر: '+n,`<div class="row"><button class="btn" onclick='uAct(${q(n)},"reset")'>${ib('refresh','صفر کردن مصرف')}</button><button class="btn" onclick='uAct(${q(n)},"rotate")'>${ib('key','لینک جدید')}</button><button class="btn" onclick='uAct(${q(n)},"rotate_socks")'>${ib('key','پسورد SOCKS5 جدید')}</button><button class="btn d" onclick='delUser(${q(n)})'>${ib('trash','حذف کاربر')}</button></div>`,[]);
+async function uAct(n,a){const m={rotate:'لینک قبلی '+n+' از کار میفته. ادامه؟',rotate_socks:'پسورد SOCKS5 قبلی '+n+' از کار میفته. ادامه؟',reset:'مصرف '+n+' صفر بشه؟'}[a];if(m&&!confirm(m))return;
+  await act(()=>api('/api/users/'+encodeURIComponent(n)+'/'+a,'POST'),'انجام شد');$('dlg').open&&$('dlg').close()}
+async function delUser(n){if(!confirm('کاربر '+n+' حذف بشه؟'))return;await act(()=>api('/api/users/'+encodeURIComponent(n),'DELETE'),'حذف شد');$('dlg').close()}
+function userDlg(n){const u=n?ST.users.find(x=>x.name===n):{note:'',max_conns:0,quota_gb:0,expires:''};
+  dialog(n?'ویرایش '+n:'کاربر جدید',`${n?'':'<label>اسم (انگلیسی، عدد، - و _)</label><input id="uN" class="mono" placeholder="ali">'}
+   <label>توضیح</label><input id="uT" value="${esc(u.note)}" placeholder="مثلاً: گروه خانواده">
+   <div class="row"><div class="f"><label>سقف ترافیک (GB، 0 = نامحدود)</label><input id="uQ" type="number" min="0" step="0.5" value="${u.quota_gb}"></div><div class="f"><label>سقف اتصال همزمان (0 = نامحدود)</label><input id="uM" type="number" min="0" value="${u.max_conns}"></div></div>
+   <div class="small mut">هر دستگاه تلگرام معمولاً ۴ تا ۸ اتصال باز می‌کنه.</div>
+   <label>تاریخ انقضا (خالی = همیشه)</label><div class="row"><input id="uE" type="date" class="f" value="${esc(u.expires)}">${[7,30,90].map(d=>`<button class="btn s" onclick="$('uE').value=new Date(Date.now()+${d}*864e5).toISOString().slice(0,10)">${fa(d)} روز</button>`).join('')}</div>`,
+  [[n?'ذخیره':'ساختن','p',async()=>{const b={note:$('uT').value,quota_gb:$('uQ').value,max_conns:$('uM').value,expires:$('uE').value};
+    await api(n?'/api/users/'+encodeURIComponent(n):'/api/users','POST',n?b:{...b,name:$('uN').value});toast('ذخیره شد');load()}]])}
+function linksDlg(n){const u=ST.users.find(x=>x.name===n);if(!u.links.length){toast('اول یه TCP بساز');return}
+  const prim=u.links.find(l=>ST.endpoints.some(e=>e.key===l.key&&e.primary))||u.links[0];
+  dialog('لینک‌های '+n,`<div class="row nw" style="align-items:flex-start;gap:14px"><div id="qrBox" class="qr ${ST.qr?'':'hide'}"></div><div class="f small mut">با اسکن QR یا کپی لینک وصل میشن. برای اینکه اگه یه TCP فیلتر شد کاربرت قطع نشه، «کپی همه» رو بزن و همه‌ی لینک‌ها رو براش بفرست.</div></div>
+   <div style="margin-top:12px">${u.links.map(l=>`<div class="linkrow"><span class="dot ${dcls(verdict(ST.endpoints.find(e=>e.key===l.key)))}"></span><span class="mono" style="flex:1">${esc(l.host)}:${l.port}</span>${l.kind==='socks'?'<span class="pill">SOCKS5</span>':''}
+    <button class="btn s" onclick='showQr(${q(l.link)})'>${ic('qr',14)}</button><button class="btn s p" title="لینک تلگرام" onclick='copy(${q(l.link)})'>${ic('copy',14)}</button>${l.url?`<button class="btn s" title="socks5://user:pass@host:port" onclick='copy(${q(l.url)})'>${ic('link',14)}</button>`:''}</div>`).join('')}</div>
+   ${u.links.some(l=>l.kind==='socks')?`<div class="small mut" style="margin-top:6px">برای SOCKS5: دکمه‌ی پر (کپی) لینک تلگرامه. دکمه‌ی زنجیر آدرس <span class="mono">socks5://user:pass@host:port</span> رو کپی می‌کنه که توی هر برنامه‌ای (مرورگر، سیستم، ...) کار می‌کنه.<br><span class="mono">user: ${esc(u.name)} · pass: ${esc(u.socks_pass)}</span></div>`:''}`,
+   [['کپی همه','p',()=>{copy(u.links.map(l=>l.link).join('\n'));throw 0}]]);showQr(prim.link)}
+async function showQr(l){if(!ST.qr)return;const r=await fetch('/api/qr?t='+encodeURIComponent(l));if(r.ok&&$('qrBox'))$('qrBox').innerHTML=await r.text()}
+
+// ---- sponsors / settings / logs ----
+function renderSponsor(){const sp=ST.sponsors,eps=ST.endpoints.filter(e=>e.kind!=='socks');
+  $('spList').innerHTML=sp.length?sp.map(s=>`<div class="linkrow"><div style="flex:1;min-width:0"><b>${esc(s.name)}</b> ${s.default?`<span class="pill inv">${ic('star',12)}پیش‌فرض</span>`:''}<div class="mono mut">${esc(s.tag)}</div><div class="small mut">روی ${fa(s.uses)} TCP</div></div>
+    ${s.default?'':`<button class="btn s" onclick='act(()=>api("/api/sponsors/default","POST",{name:${q(s.name)}}),"پیش‌فرض شد")'>${ic('star',14)}</button>`}
+    <button class="btn s" onclick='$("spName").value=${q(s.name)};$("spTag").value=${q(s.tag)}'>${ic('edit',14)}</button>
+    <button class="btn s d" onclick='if(confirm("حذف ${esc(s.name)}؟"))act(()=>api("/api/sponsors/${encodeURIComponent(s.name)}","DELETE"),"حذف شد")'>${ic('trash',14)}</button></div>`).join('')+(ST.default_sponsor?`<div class="small mut" style="margin:-2px 0 8px">با حذف پیش‌فرض، TCPهای بدون انتخاب بدون اسپانسر میشن.</div>`:''):'<div class="empty">هنوز کانالی اضافه نشده</div>';
+  const r=$('regEp'),cur=r.value;r.innerHTML=eps.map(e=>`<option value="${esc(e.key)}">${esc((e.alias||e.domain)+':'+e.port)}</option>`).join('');r.value=cur&&eps.some(e=>e.key===cur)?cur:(eps.find(e=>e.primary)||{}).key||'';
+  const e=eps.find(x=>x.key===r.value),u=ST.users.find(x=>x.enabled)||ST.users[0];$('hp').textContent=e?(e.alias||e.domain)+':'+e.port:'-';$('rs').textContent=u?u.raw_secret:'-'}
+const saveSp=()=>act(async()=>{await api('/api/sponsors','POST',{name:$('spName').value,tag:$('spTag').value});$('spName').value=$('spTag').value=''},'ذخیره و اعمال شد');
+const saveDom=()=>{const d=$('dom').value.trim();if(d!==ST.tls_domain&&!confirm('با عوض کردن دامنه لینک همه‌ی کاربرها عوض میشه. ادامه؟'))return;act(()=>api('/api/settings','POST',{tls_domain:d}),'ذخیره شد')};
+const saveToken=()=>act(async()=>{await api('/api/railway','POST',{token:$('tok').value.trim()});$('tok').value=''},'ذخیره شد');
+const changePw=()=>act(async()=>{await api('/api/password','POST',{current:$('pw0').value,new:$('pw1').value});$('pw0').value=$('pw1').value=''},'رمز عوض شد');
+function restore(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const b=JSON.parse(r.result);if(!confirm('همه‌ی تنظیمات فعلی با بکاپ جایگزین میشه. ادامه؟'))return;
+  await api('/api/restore','POST',{backup:b});toast('بازگردانی شد');load(true)}catch(e){toast('فایل نامعتبره')}inp.value=''};r.readAsText(f)}
+const restartProxy=()=>confirm('همه‌ی اتصال‌های فعلی قطع میشن. ریستارت؟')&&act(()=>api('/api/restart','POST'),'ریستارت شد');
+function renderSettings(){const r=ST.railway;$('tokState').innerHTML=r.token_set?`<span class="pill ${r.err?'bad':'ok'}">${r.err?'خطا':'وصل'}</span>`:'<span class="pill">تنظیم نشده</span>';
+  $('sysBox').innerHTML=[['وضعیت پروکسی',ST.running?'روشن':'خاموش'],['پروسه‌ها (به ازای هر کانال)',fa(ST.instances)],['آپتایم پروکسی',dur(ST.proxy_uptime)],['آپتایم پنل',dur(ST.panel_uptime)],['تعداد ریستارت',fa(ST.restarts)],['پورت‌های ورودی',`<span class="mono">${ST.entry_ports.join('-')}</span>`],['آمار',ST.metrics_ok?'فعال':'در انتظار']]
+   .map(x=>`<div class="row sb" style="padding:5px 0;border-bottom:1px dashed var(--line)"><span class="mut">${x[0]}</span><span>${x[1]}</span></div>`).join('')}
+function renderLogs(){const ic2={ok:'check',warn:'ban'};
+  $('events').innerHTML=ST.events.map(e=>`<div class="ev"><span class="mut">${ic(ic2[e.kind]||'activity',14)}</span><span style="flex:1">${esc(e.msg)}</span><span class="small mut">${ago(e.ts)}</span></div>`).join('')||'<div class="empty">خالی</div>';
+  $('log').innerHTML=ST.log.map(esc).join('<br>')||'<span class="mut">خالی</span>'}
+function dialog(title,html,btns){$('dT').textContent=title;$('dB').innerHTML=html;$('dF').innerHTML='';
+  (btns||[]).forEach(([t,c,fn])=>{const b=document.createElement('button');b.className='btn '+c;b.textContent=t;b.onclick=async()=>{try{await fn();$('dlg').close()}catch(e){}};$('dF').appendChild(b)});
+  const x=document.createElement('button');x.className='btn';x.textContent='بستن';x.onclick=()=>$('dlg').close();$('dF').appendChild(x);$('dlg').showModal()}
+go(location.hash.slice(1)||'dash');load(true);
+setInterval(()=>{if(!$('app').classList.contains('hide')&&!$('dlg').open&&!document.hidden){load();if(TAB==='rall'&&RALL.live&&!RALL.loop)rallLoop()}},2000);
+</script>
+</body>
+</html>
