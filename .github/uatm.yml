@@ -1,1 +1,37 @@
+name: unzip
+
+on:
+  push:
+    branches: [main]
+    paths: ["*.zip"]
+
+permissions:
+  contents: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: extract
+        run: |
+          set -e
+          for z in *.zip; do
+            [ -f "$z" ] || continue
+            tmp=$(mktemp -d)
+            unzip -q -o "$z" -d "$tmp"
+            src="$tmp"
+            top=$(ls -A "$tmp")
+            if [ "$(echo "$top" | wc -l)" = 1 ] && [ -f "$tmp/$top/Dockerfile" ]; then
+              src="$tmp/$top"
+            fi
+            rm -rf "$src/.github"
+            cp -a "$src/." .
+            git rm -q "$z"
+          done
+          git config user.name "uatm-bot"
+          git config user.email "uatm-bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "extract zip" || exit 0
+          git push origin "HEAD:${GITHUB_REF_NAME:-main}"
 
